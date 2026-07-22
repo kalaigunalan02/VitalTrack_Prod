@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+}
+
+.card {
+  @apply bg-surface border border-border rounded-xl2 p-5;
+}
+
+.input {
+  @apply w-full bg-surface2 border border-border rounded-lg px-4 py-3 text-white placeholder-muted/60 outline-none focus:border-brand/60 transition-colors;
+}
+
+.label {
+  @apply text-sm text-muted mb-2 block;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 font-semibold transition-colors;
+}
+
+.btn-primary {
+  @apply btn bg-brand text-bg hover:bg-brand-light;
+}
+
+.btn-outline {
+  @apply btn bg-surface2 text-white border border-border hover:bg-white/5;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 8px; }

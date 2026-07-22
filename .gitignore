@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Environment files — contain secrets. Keep .env.example committed instead.
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# OS / editor
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# Local session/agent metadata (not part of the app)
+.zcode/
+
+# Supabase local CLI
+supabase/.branches
+supabase/.temp
