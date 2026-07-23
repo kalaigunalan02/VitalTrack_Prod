@@ -76,13 +76,6 @@ input[type="month"]::-webkit-date-and-time-value {
   text-align: left;
 }
 
-/* TEMP DEBUG: visible outlines to locate the overflow on iPhone Safari.
-   Red = card boundary, Yellow = field wrapper, Cyan = time input.
-   Remove once the layout is confirmed correct. */
-.card { outline: 2px solid red; }
-form .grid > div { outline: 2px dashed yellow; }
-input[type="time"] { outline: 2px solid cyan !important; }
-
 /* iOS safe-area: keep content clear of the notch / home indicator. */
 .safe-bottom {
   padding-bottom: max(6rem, calc(env(safe-area-inset-bottom) + 6rem));
