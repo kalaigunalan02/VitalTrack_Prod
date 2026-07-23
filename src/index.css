@@ -59,7 +59,6 @@ input, select, textarea {
 /* Safari native pickers: constrain the rendered value so the control fits.
  * The ::-webkit-date-and-time-value pseudo is where Safari's intrinsic width
  * lives; capping it + flex centering makes the input respect width:100%. */
-input[type="time"],
 input[type="date"],
 input[type="datetime-local"],
 input[type="month"] {
@@ -67,6 +66,12 @@ input[type="month"] {
   min-width: 0;
   max-width: 100%;
 }
+input[type="time"]{
+  width: 05%;
+  min-width: 0;
+  max-width: 95%;
+}
+
 input[type="time"]::-webkit-date-and-time-value,
 input[type="date"]::-webkit-date-and-time-value,
 input[type="datetime-local"]::-webkit-date-and-time-value,
