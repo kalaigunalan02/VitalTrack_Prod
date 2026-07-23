@@ -67,9 +67,9 @@ input[type="month"] {
   max-width: 100%;
 }
 input[type="time"]{
-  width: 95%;
+  width: 90%;
   min-width: 0;
-  max-width: 95%;
+  max-width: 90%;
 }
 
 input[type="time"]::-webkit-date-and-time-value,
