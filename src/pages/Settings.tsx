@@ -4,6 +4,7 @@ import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import { Profile } from '../types'
 import { Version } from '../components/ui/Version'
+import { Toggle } from '../components/ui/Toggle'
 
 type Tab = 'profiles' | 'notifications' | 'backup' | 'security'
 
@@ -201,17 +202,16 @@ function NotificationsTab() {
   return (
     <div className="card space-y-5 max-w-2xl">
       {items.map((i) => (
-        <div key={i.key} className="flex items-center justify-between">
+        <div key={i.key} className="flex items-center justify-between gap-4">
           <div>
             <p className="font-medium">{i.label}</p>
             <p className="text-muted text-sm">{i.desc}</p>
           </div>
-          <button
-            onClick={() => setSettings((s) => ({ ...s, [i.key]: !s[i.key] }))}
-            className={`w-12 h-7 rounded-full transition-colors relative ${settings[i.key] ? 'bg-brand' : 'bg-white/10'}`}
-          >
-            <span className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-transform ${settings[i.key] ? 'translate-x-6' : 'translate-x-1'}`} />
-          </button>
+          <Toggle
+            checked={settings[i.key]}
+            onChange={(v) => setSettings((s) => ({ ...s, [i.key]: v }))}
+            label={i.label}
+          />
         </div>
       ))}
     </div>

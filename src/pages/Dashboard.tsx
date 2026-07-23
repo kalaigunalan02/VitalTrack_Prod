@@ -150,19 +150,19 @@ export default function Dashboard() {
       {/* Latest BP Card */}
       <div className="card bg-brand/10 border-brand/30">
         {latestBP ? (
-          <div className="flex flex-wrap items-end gap-10">
-            <div>
+          <div className="flex flex-nowrap sm:flex-wrap items-end gap-3 sm:gap-10">
+            <div className="min-w-0">
               <p className="text-brand text-sm mb-1">Latest Blood Pressure · {latestBP.time}</p>
-              <p className="text-5xl font-bold">
+              <p className="text-3xl sm:text-5xl font-bold whitespace-nowrap">
                 {latestBP.fields.systolic}
                 <span className="text-muted">/{latestBP.fields.diastolic}</span>
               </p>
               <p className="text-muted text-sm mt-1">mmHg</p>
             </div>
-            <div className="border-l border-border pl-10">
+            <div className="border-l border-border pl-3 sm:pl-10 min-w-0">
               <p className="text-muted text-sm mb-1">Pulse</p>
-              <p className="text-3xl font-bold">
-                {latestBP.fields.pulse} <span className="text-base font-normal text-muted">bpm</span>
+              <p className="text-xl sm:text-3xl font-bold whitespace-nowrap">
+                {latestBP.fields.pulse} <span className="text-xs sm:text-base font-normal text-muted">bpm</span>
               </p>
               <div className="mt-2">
                 <StatusPill label={classifyBP(latestBP.fields.systolic, latestBP.fields.diastolic)} />
