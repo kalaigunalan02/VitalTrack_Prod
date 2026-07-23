@@ -67,7 +67,7 @@ input[type="month"] {
   max-width: 100%;
 }
 input[type="time"]{
-  width: 05%;
+  width: 95%;
   min-width: 0;
   max-width: 95%;
 }
