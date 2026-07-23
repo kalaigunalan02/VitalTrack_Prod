@@ -30,21 +30,20 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 /*
  * Safari/iOS WebKit renders native <input type="time"> as a shadow-DOM widget
- * with its own intrinsic minimum width (room for HH:MM AM/PM + the clock icon).
- * min-width:0 on the input alone doesn't tame it; the shadow content still
- * forces the element wider than its grid cell, pushing it past the card edge.
+ * whose internal pseudo-elements carry a min-width (room for HH:MM AM/PM + the
+ * clock icon). That min-width can exceed the card on small screens.
  *
- * This combination reliably constrains it on iPhone Safari:
- *  1. Wrapper divs are rigidly bounded (width:100%, min-width:0, overflow hidden)
- *     so they cannot grow beyond the grid track.
- *  2. The input itself is forced to the wrapper's width via width:100%.
+ * IMPORTANT: do NOT use overflow:hidden on the wrapper — it clips the input's
+ * right border/rounded corner (the "cut off on the right" bug) without actually
+ * shrinking the control. Instead, constrain the shadow DOM itself:
+ *   - cap the ::-webkit-date-and-time-value pseudo-element width
+ *   - force the input box-model to respect its container via width:100%
  */
 form .grid > div,
 .field {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  overflow: hidden;
 }
 /* Grids inside forms can themselves be oversized grid items; bound them too. */
 form .grid,
@@ -57,10 +56,9 @@ input, select, textarea {
   max-width: 100%;
 }
 
-/* Safari native pickers: keep them inside their container.
- * (We avoid -webkit-appearance:none here because it can break the native picker
- * on some iOS versions; the wrapper's overflow:hidden + width constraints
- * already force the control to fit.) */
+/* Safari native pickers: constrain the rendered value so the control fits.
+ * The ::-webkit-date-and-time-value pseudo is where Safari's intrinsic width
+ * lives; capping it + flex centering makes the input respect width:100%. */
 input[type="time"],
 input[type="date"],
 input[type="datetime-local"],
@@ -68,6 +66,14 @@ input[type="month"] {
   width: 100%;
   min-width: 0;
   max-width: 100%;
+}
+input[type="time"]::-webkit-date-and-time-value,
+input[type="date"]::-webkit-date-and-time-value,
+input[type="datetime-local"]::-webkit-date-and-time-value,
+input[type="month"]::-webkit-date-and-time-value {
+  min-width: 0;
+  width: auto;
+  text-align: left;
 }
 
 /* iOS safe-area: keep content clear of the notch / home indicator. */
