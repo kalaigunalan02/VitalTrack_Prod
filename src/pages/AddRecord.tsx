@@ -293,7 +293,7 @@ function BloodForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   return (
     <form onSubmit={handle}>
       <FormHeader icon={<Heart size={18} className="text-danger" />} label="Blood Pressure" colorClass="bg-danger/15 text-danger" editing={editing} />
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div><label className="label">Time</label><input type="time" required value={time} onChange={(e) => setTime(e.target.value)} className="input" /></div>
         <div>
           <label className="label">Meal Context</label>
@@ -302,7 +302,7 @@ function BloodForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
           </select>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
         <div><label className="label">Systolic</label><input type="number" required placeholder="120" value={systolic} onChange={(e) => setSystolic(e.target.value)} className="input" /></div>
         <div><label className="label">Diastolic</label><input type="number" required placeholder="80" value={diastolic} onChange={(e) => setDiastolic(e.target.value)} className="input" /></div>
         <div><label className="label">Pulse</label><input type="number" required placeholder="72" value={pulse} onChange={(e) => setPulse(e.target.value)} className="input" /></div>
@@ -335,7 +335,7 @@ function MealForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   return (
     <form onSubmit={handle}>
       <FormHeader icon={<Utensils size={18} className="text-meal" />} label="Meal / Snack" colorClass="bg-meal/15 text-meal" editing={editing} />
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div><label className="label">Time</label><input type="time" required value={time} onChange={(e) => setTime(e.target.value)} className="input" /></div>
         <div>
           <label className="label">Type</label>
@@ -374,7 +374,7 @@ function ExerciseForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   return (
     <form onSubmit={handle}>
       <FormHeader icon={<Dumbbell size={18} className="text-brand" />} label="Exercise" colorClass="bg-brand/15 text-brand" editing={editing} />
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div><label className="label">Time</label><input type="time" required value={time} onChange={(e) => setTime(e.target.value)} className="input" /></div>
         <div>
           <label className="label">Exercise Type</label>
@@ -383,7 +383,7 @@ function ExerciseForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
           </select>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div><label className="label">Duration (min)</label><input type="number" required value={duration} onChange={(e) => setDuration(e.target.value)} className="input" /></div>
         <div>
           <label className="label">Intensity</label>
@@ -419,7 +419,7 @@ function SleepForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   return (
     <form onSubmit={handle}>
       <FormHeader icon={<Moon size={18} className="text-sleep" />} label="Sleep" colorClass="bg-sleep/15 text-sleep" editing={editing} />
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div><label className="label">Bed Time</label><input type="time" required value={bedTime} onChange={(e) => setBedTime(e.target.value)} className="input" /></div>
         <div><label className="label">Wake Time</label><input type="time" required value={wakeTime} onChange={(e) => setWakeTime(e.target.value)} className="input" /></div>
       </div>
@@ -463,7 +463,7 @@ function SymptomsForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   return (
     <form onSubmit={handle}>
       <FormHeader icon={<AlertTriangle size={18} className="text-symptom" />} label="Symptoms" colorClass="bg-symptom/15 text-symptom" editing={editing} />
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div><label className="label">Time</label><input type="time" required value={time} onChange={(e) => setTime(e.target.value)} className="input" /></div>
         <div>
           <label className="label">Time of Day</label>
@@ -554,7 +554,7 @@ function MedicationForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   return (
     <form onSubmit={handle}>
       <FormHeader icon={<Pill size={18} className="text-info" />} label="Medication" colorClass="bg-info/15 text-info" editing={editing} />
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div><label className="label">Time</label><input type="time" required value={time} onChange={(e) => setTime(e.target.value)} className="input" /></div>
         <div><label className="label">Dosage</label><input placeholder="e.g. 10mg" value={dosage} onChange={(e) => setDosage(e.target.value)} className="input" /></div>
       </div>
@@ -590,11 +590,11 @@ function WaterForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   return (
     <form onSubmit={handle}>
       <FormHeader icon={<Droplets size={18} className="text-water" />} label="Water" colorClass="bg-water/15 text-water" editing={editing} />
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div><label className="label">Time</label><input type="time" required value={time} onChange={(e) => setTime(e.target.value)} className="input" /></div>
         <div><label className="label">Amount (ml)</label><input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} className="input" /></div>
       </div>
-      <div className="flex gap-2 mb-5">
+      <div className="flex flex-wrap gap-2 mb-5">
         {presets.map((p) => (
           <Chip key={p} active={Number(amount) === p} onClick={() => setAmount(String(p))} colorClass="border-water text-water bg-water/10">
             {p}ml

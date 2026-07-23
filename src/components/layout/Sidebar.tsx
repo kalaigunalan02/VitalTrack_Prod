@@ -4,6 +4,7 @@ import { Heart, LayoutGrid, PlusCircle, History, FileText, Settings as SettingsI
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
 import { EnvBadge } from '../ui/EnvBadge'
+import { Version } from '../ui/Version'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
@@ -64,6 +65,9 @@ export function Sidebar() {
         >
           <LogOut size={16} /> Sign Out
         </button>
+        <div className="mt-3 px-2">
+          <Version />
+        </div>
       </div>
     </aside>
   )

@@ -5,6 +5,9 @@ node_modules/
 dist/
 dist-ssr/
 
+# Auto-generated build version file (created by npm run version / prebuild)
+src/version.ts
+
 # Environment files — contain secrets. Keep .env.example committed instead.
 .env
 .env.local

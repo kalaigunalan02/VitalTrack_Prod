@@ -3,6 +3,7 @@ import { User, Bell, Download as DownloadIcon, Lock, Plus, Pencil, Trash2 } from
 import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import { Profile } from '../types'
+import { Version } from '../components/ui/Version'
 
 type Tab = 'profiles' | 'notifications' | 'backup' | 'security'
 
@@ -37,12 +38,12 @@ export default function Settings() {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-6 border-b border-border">
+      <div className="flex gap-6 border-b border-border overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setTab(id)}
-            className={`flex items-center gap-2 pb-3 text-sm border-b-2 transition-colors ${
+            className={`flex items-center gap-2 pb-3 text-sm border-b-2 transition-colors shrink-0 ${
               tab === id ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-white'
             }`}
           >
@@ -55,6 +56,10 @@ export default function Settings() {
       {tab === 'notifications' && <NotificationsTab />}
       {tab === 'backup' && <BackupTab />}
       {tab === 'security' && <SecurityTab />}
+
+      <div className="pt-6 border-t border-border">
+        <Version />
+      </div>
     </div>
   )
 }
@@ -85,9 +90,9 @@ function ProfilesTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <p className="text-muted">Manage profiles for each family member</p>
-        <button onClick={startNew} className="btn-primary">
+        <button onClick={startNew} className="btn-primary w-full sm:w-auto">
           <Plus size={18} /> Add Profile
         </button>
       </div>

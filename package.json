@@ -4,8 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "version": "node scripts/version.mjs",
+    "dev": "npm run version && vite",
+    "build": "npm run version && tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
