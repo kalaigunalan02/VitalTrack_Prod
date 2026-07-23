@@ -267,6 +267,23 @@ function FormHeader({ icon, label, colorClass, editing }: { icon: React.ReactNod
   )
 }
 
+// Realistic physiological ranges used to validate BP + pulse entries.
+// Systolic/diastolic bounds mirror the bands classifyBP() reasons about.
+const BP_RANGES = {
+  systolic: { min: 60, max: 300, label: 'Systolic' },
+  diastolic: { min: 30, max: 200, label: 'Diastolic' },
+  pulse: { min: 20, max: 250, label: 'Pulse' },
+}
+
+function bpFieldError(raw: string, range: { min: number; max: number; label: string }): string | null {
+  const trimmed = raw.trim()
+  if (!trimmed) return `${range.label} is required`
+  const num = Number(trimmed)
+  if (!Number.isFinite(num)) return `${range.label} must be a number`
+  if (num < range.min || num > range.max) return `${range.label} must be ${range.min}\u2013${range.max}`
+  return null
+}
+
 function BloodForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   const [time, setTime] = useState(editing?.time ?? nowTime())
   const [systolic, setSystolic] = useState(editing ? String(editing.fields.systolic ?? '') : '')
@@ -275,10 +292,25 @@ function BloodForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   const [mealContext, setMealContext] = useState(editing?.fields.mealContext ?? 'N/A')
   const [notes, setNotes] = useState(editing?.notes ?? '')
   const [busy, setBusy] = useState(false)
+  // Validation errors are only shown after the user attempts to submit, so the
+  // form doesn't nag before they've started typing.
+  const [showErrors, setShowErrors] = useState(false)
+
+  const errors = {
+    systolic: bpFieldError(systolic, BP_RANGES.systolic),
+    diastolic: bpFieldError(diastolic, BP_RANGES.diastolic),
+    pulse: bpFieldError(pulse, BP_RANGES.pulse),
+  }
+  const hasErrors = Boolean(errors.systolic || errors.diastolic || errors.pulse)
 
   async function handle(e: React.FormEvent) {
     e.preventDefault()
-    if (!systolic || !diastolic || !pulse) return
+    // Surface inline errors instead of silently bailing out; the native
+    // `required` popups are unreliable on mobile.
+    if (hasErrors) {
+      setShowErrors(true)
+      return
+    }
     const fields = { systolic: Number(systolic), diastolic: Number(diastolic), pulse: Number(pulse), mealContext }
     setBusy(true)
     if (editing && onUpdate) {
@@ -286,9 +318,14 @@ function BloodForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
     } else {
       await onSubmit(fields, time, notes)
       setSystolic(''); setDiastolic(''); setPulse(''); setNotes(''); setTime(nowTime())
+      setShowErrors(false)
     }
     setBusy(false)
   }
+
+  const fieldErr = (msg: string | null) =>
+    showErrors && msg ? <p className="text-danger text-xs mt-1.5" role="alert">{msg}</p> : null
+  const inputClass = (msg: string | null) => `input ${showErrors && msg ? 'input-error' : ''}`
 
   return (
     <form onSubmit={handle}>
@@ -303,9 +340,21 @@ function BloodForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <div><label className="label">Systolic</label><input type="number" required placeholder="120" value={systolic} onChange={(e) => setSystolic(e.target.value)} className="input" /></div>
-        <div><label className="label">Diastolic</label><input type="number" required placeholder="80" value={diastolic} onChange={(e) => setDiastolic(e.target.value)} className="input" /></div>
-        <div><label className="label">Pulse</label><input type="number" required placeholder="72" value={pulse} onChange={(e) => setPulse(e.target.value)} className="input" /></div>
+        <div>
+          <label className="label">Systolic</label>
+          <input type="number" inputMode="numeric" min={BP_RANGES.systolic.min} max={BP_RANGES.systolic.max} placeholder="120" value={systolic} onChange={(e) => { setSystolic(e.target.value); setShowErrors(false) }} className={inputClass(errors.systolic)} />
+          {fieldErr(errors.systolic)}
+        </div>
+        <div>
+          <label className="label">Diastolic</label>
+          <input type="number" inputMode="numeric" min={BP_RANGES.diastolic.min} max={BP_RANGES.diastolic.max} placeholder="80" value={diastolic} onChange={(e) => { setDiastolic(e.target.value); setShowErrors(false) }} className={inputClass(errors.diastolic)} />
+          {fieldErr(errors.diastolic)}
+        </div>
+        <div>
+          <label className="label">Pulse</label>
+          <input type="number" inputMode="numeric" min={BP_RANGES.pulse.min} max={BP_RANGES.pulse.max} placeholder="72" value={pulse} onChange={(e) => { setPulse(e.target.value); setShowErrors(false) }} className={inputClass(errors.pulse)} />
+          {fieldErr(errors.pulse)}
+        </div>
       </div>
       <div className="mb-5"><label className="label">Notes (optional)</label><textarea placeholder="Any observations..." value={notes} onChange={(e) => setNotes(e.target.value)} className="input min-h-[80px] resize-none" /></div>
       <FormActions editing={editing} busy={busy} addLabel="Add BP Reading" updateLabel="Update BP Reading" addClass="bg-danger/15 text-danger border border-danger/40 hover:bg-danger/25" onCancel={onCancel} />

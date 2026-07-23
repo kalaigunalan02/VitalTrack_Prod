@@ -17,26 +17,57 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .card {
   @apply bg-surface border border-border rounded-xl2 p-5;
   min-width: 0; /* allow cards to shrink inside grid/flex columns instead of forcing overflow */
+  max-width: 100%;
 }
 
 .input {
-  @apply w-full bg-surface2 border border-border rounded-lg px-4 py-3 text-white placeholder-muted/60 outline-none focus:border-brand/60 transition-colors;
+  @apply bg-surface2 border border-border rounded-lg px-4 py-3 text-white placeholder-muted/60 outline-none focus:border-brand/60 transition-colors;
+  display: block;
   width: 100%;
   max-width: 100%;
-  min-width: 0; /* Safari gives time/date inputs a large intrinsic min-width; override so they respect the container */
+  min-width: 0;
 }
 
 /*
- * Safari reserves a wide intrinsic minimum for native pickers (time/date/color)
- * and the wrapper divs are grid items whose default min-width:auto adopts that,
- * pushing the input past the card edge. Force every form control AND its grid
- * wrapper to shrink, so inputs always stay inside their card on mobile Safari.
+ * Safari/iOS WebKit renders native <input type="time"> as a shadow-DOM widget
+ * with its own intrinsic minimum width (room for HH:MM AM/PM + the clock icon).
+ * min-width:0 on the input alone doesn't tame it; the shadow content still
+ * forces the element wider than its grid cell, pushing it past the card edge.
+ *
+ * This combination reliably constrains it on iPhone Safari:
+ *  1. Wrapper divs are rigidly bounded (width:100%, min-width:0, overflow hidden)
+ *     so they cannot grow beyond the grid track.
+ *  2. The input itself is forced to the wrapper's width via width:100%.
  */
+form .grid > div,
+.field {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+/* Grids inside forms can themselves be oversized grid items; bound them too. */
+form .grid,
+form form {
+  min-width: 0;
+  max-width: 100%;
+}
 input, select, textarea {
   min-width: 0;
+  max-width: 100%;
 }
-form .grid > div {
+
+/* Safari native pickers: keep them inside their container.
+ * (We avoid -webkit-appearance:none here because it can break the native picker
+ * on some iOS versions; the wrapper's overflow:hidden + width constraints
+ * already force the control to fit.) */
+input[type="time"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="month"] {
+  width: 100%;
   min-width: 0;
+  max-width: 100%;
 }
 
 /* iOS safe-area: keep content clear of the notch / home indicator. */
@@ -45,6 +76,14 @@ form .grid > div {
 }
 @media (min-width: 1024px) {
   .safe-bottom { padding-bottom: 0; }
+}
+
+/* Invalid-state variant of .input, toggled when a field fails inline validation. */
+.input-error {
+  border-color: #F87171 !important;
+}
+.input-error:focus {
+  border-color: rgba(248, 113, 113, 0.85) !important;
 }
 
 .label {
