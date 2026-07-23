@@ -116,9 +116,9 @@ export default function AddRecord() {
         </button>
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_400px] gap-6 items-start">
-        <div className="space-y-6">
-          <div className="grid grid-cols-4 gap-3">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_400px] gap-6 items-start">
+        <div className="space-y-6 min-w-0">
+          <div className="grid grid-cols-4 sm:grid-cols-4 gap-2 sm:gap-3">
             {categories.map((c) => {
               const Icon = c.icon
               const isActive = active === c.id
@@ -126,12 +126,12 @@ export default function AddRecord() {
                 <button
                   key={c.id}
                   onClick={() => selectCategory(c.id)}
-                  className={`flex flex-col items-center gap-2 py-4 rounded-xl border transition-colors ${
+                  className={`flex flex-col items-center gap-1.5 py-3 sm:py-4 px-1 rounded-xl border transition-colors min-w-0 ${
                     isActive ? c.activeClass : 'border-border bg-surface text-muted hover:bg-white/5'
                   }`}
                 >
-                  <Icon size={20} />
-                  <span className="text-sm">{c.label}</span>
+                  <Icon size={18} className="shrink-0" />
+                  <span className="text-xs sm:text-sm truncate w-full text-center">{c.label}</span>
                 </button>
               )
             })}
@@ -148,7 +148,7 @@ export default function AddRecord() {
           </div>
         </div>
 
-        <div className="card lg:sticky lg:top-24">
+        <div className="card lg:sticky lg:top-24 min-w-0">
           <h3 className="font-bold mb-4">Today's Journal <span className="text-muted font-normal">({dayRecords.length} entries)</span></h3>
           <div className="space-y-2 max-h-[70vh] overflow-y-auto pr-1">
             {dayRecords.length === 0 && <p className="text-muted text-sm py-6 text-center">No entries yet for this day.</p>}

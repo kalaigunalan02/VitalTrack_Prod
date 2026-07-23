@@ -5,6 +5,9 @@
 * { box-sizing: border-box; }
 body { margin: 0; }
 
+/* Prevent mobile horizontal scroll from any stray wide content. */
+html, body { max-width: 100%; overflow-x: hidden; }
+
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
@@ -13,10 +16,20 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .card {
   @apply bg-surface border border-border rounded-xl2 p-5;
+  min-width: 0; /* allow cards to shrink inside grid/flex columns instead of forcing overflow */
 }
 
 .input {
   @apply w-full bg-surface2 border border-border rounded-lg px-4 py-3 text-white placeholder-muted/60 outline-none focus:border-brand/60 transition-colors;
+  max-width: 100%;
+}
+
+/* iOS safe-area: keep content clear of the notch / home indicator. */
+.safe-bottom {
+  padding-bottom: max(6rem, calc(env(safe-area-inset-bottom) + 6rem));
+}
+@media (min-width: 1024px) {
+  .safe-bottom { padding-bottom: 0; }
 }
 
 .label {

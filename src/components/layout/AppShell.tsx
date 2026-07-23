@@ -44,19 +44,20 @@ export function AppShell() {
   return (
     <div className="flex min-h-screen bg-bg">
       <Sidebar />
-      <div className="flex-1 min-w-0 pb-20 lg:pb-0">
+      <div className="flex-1 min-w-0 pb-24 lg:pb-0 safe-bottom">
         <Topbar title={title} onOpenMenu={() => setMenuOpen(true)} />
         <main className="px-4 lg:px-10 py-6 max-w-[1600px]">
           <Outlet />
         </main>
       </div>
       <HelpFab />
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-border flex items-center justify-around py-2 z-20">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 max-w-[100vw] bg-surface border-t border-border flex items-center justify-around py-2 z-20"
+        style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
         {mobileNav.map(({ to, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
-            className={({ isActive }) => `p-3 rounded-lg ${isActive ? 'text-brand' : 'text-muted'}`}
+            className={({ isActive }) => `min-w-0 flex-1 flex justify-center p-3 rounded-lg ${isActive ? 'text-brand' : 'text-muted'}`}
           >
             <Icon size={20} />
           </NavLink>
