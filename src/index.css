@@ -21,7 +21,22 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .input {
   @apply w-full bg-surface2 border border-border rounded-lg px-4 py-3 text-white placeholder-muted/60 outline-none focus:border-brand/60 transition-colors;
+  width: 100%;
   max-width: 100%;
+  min-width: 0; /* Safari gives time/date inputs a large intrinsic min-width; override so they respect the container */
+}
+
+/*
+ * Safari reserves a wide intrinsic minimum for native pickers (time/date/color)
+ * and the wrapper divs are grid items whose default min-width:auto adopts that,
+ * pushing the input past the card edge. Force every form control AND its grid
+ * wrapper to shrink, so inputs always stay inside their card on mobile Safari.
+ */
+input, select, textarea {
+  min-width: 0;
+}
+form .grid > div {
+  min-width: 0;
 }
 
 /* iOS safe-area: keep content clear of the notch / home indicator. */
