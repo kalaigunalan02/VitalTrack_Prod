@@ -15,7 +15,7 @@ export function Topbar({ title, onOpenMenu }: TopbarProps) {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="safe-sticky flex items-center justify-between px-4 lg:px-10 py-4 lg:py-6 border-b border-border bg-bg/95 backdrop-blur">
+    <header className="safe-sticky flex items-center justify-between px-4 lg:px-10 py-4 lg:py-6 border-b border-border bg-bg">
       {/* Mobile/tablet: hamburger + brand */}
       <div className="flex items-center gap-3 lg:hidden">
         <button
