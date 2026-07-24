@@ -8,6 +8,25 @@ body { margin: 0; }
 /* Prevent mobile horizontal scroll from any stray wide content. */
 html, body { max-width: 100%; overflow-x: hidden; }
 
+/*
+ * Standalone PWA on iPhone: the status bar is transparent and overlays the
+ * webview, so top:0 content sits under the time/battery/notch. Push every
+ * screen below the status bar via the safe-area inset. (Requires
+ * viewport-fit=cover, which is set in index.html's meta viewport.)
+ */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Sticky header should stick below the status bar, not slide under it. */
+.safe-sticky {
+  position: sticky;
+  top: env(safe-area-inset-top);
+  z-index: 10;
+}
+
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
