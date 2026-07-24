@@ -6,6 +6,12 @@ import { AuthButton } from '../components/auth/AuthButton'
 import { useAuth } from '../context/AuthContext'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
+// Production is detected from the Supabase URL (the prod project ref), NOT from
+// VITE_APP_ENV — because VITE_APP_ENV may be unset in a Vercel build, but the
+// Supabase URL is always baked in. Replace this ref if the prod project changes.
+const PROD_SUPABASE_REF = 'vunntoepnpwuezkvbhxl'
+const isProduction = import.meta.env.VITE_SUPABASE_URL.includes(PROD_SUPABASE_REF)
+
 // Standard 4-color Google "G" mark.
 function GoogleIcon() {
   return (
@@ -121,8 +127,10 @@ export default function Login() {
         />
 
         {/* 4. Guest — local-only session. Disabled in production (demo account
-            stays in the DB, just no UI entry point for real users). */}
-        {import.meta.env.VITE_APP_ENV !== 'production' && (
+            stays in the DB, just no UI entry point for real users). Production
+            is detected from the Supabase URL so it works even if VITE_APP_ENV
+            is unset in the Vercel build. */}
+        {!isProduction && (
           <>
             <AuthButton
               icon={<UserRound size={20} />}
@@ -135,7 +143,7 @@ export default function Login() {
         )}
       </div>
 
-      {import.meta.env.VITE_APP_ENV !== 'production' && (
+      {!isProduction && (
         <p className="text-center text-xs text-muted mt-3">
           Guest mode: data stays on this device.
         </p>
