@@ -9,8 +9,10 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase'
 // Production is detected from the Supabase URL (the prod project ref), NOT from
 // VITE_APP_ENV — because VITE_APP_ENV may be unset in a Vercel build, but the
 // Supabase URL is always baked in. Replace this ref if the prod project changes.
+// Guard with (?? '') so an unset env var can't throw at module load (which
+// would white-screen the whole app).
 const PROD_SUPABASE_REF = 'vunntoepnpwuezkvbhxl'
-const isProduction = import.meta.env.VITE_SUPABASE_URL.includes(PROD_SUPABASE_REF)
+const isProduction = (import.meta.env.VITE_SUPABASE_URL ?? '').includes(PROD_SUPABASE_REF)
 
 // Standard 4-color Google "G" mark.
 function GoogleIcon() {
