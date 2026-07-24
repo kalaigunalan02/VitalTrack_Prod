@@ -229,26 +229,25 @@ export async function accountExists(email: string): Promise<boolean> {
     const db = loadDB()
     return delay(db.accounts.some((a) => a.email.toLowerCase() === email.toLowerCase()))
   }
-  // We can't list auth.users from the anon client; instead query profiles joined
-  // to accounts isn't possible without exposing emails. Use the profiles table's
-  // implicit existence: a profile row exists iff the user signed up. We look up
-  // via an RPC-free approach: attempt a lightweight check through auth by trying
-  // to see if sign-in is the right path — simplest is to query profiles by
-  // matching on the demo lookup. To keep it robust without exposing emails,
-  // fall back to "assume new" only when no profile matches. Since we cannot
-  // query auth.users, we rely on the signUp error code at registration time.
-  // For the Email step we instead resolve existence indirectly: return whether
-  // a profile row for that email exists via a search on full_name won't work.
+  // The browser anon key CANNOT read auth.users, so we call a server-side
+  // Edge Function (supabase/functions/check-email) that uses the service role
+  // key (kept secret on the server) to look the email up in auth.users.
   //
-  // Pragmatic approach: try signIn and interpret "Invalid credentials" as
-  // "not found or wrong password" — but that doesn't distinguish new vs wrong.
-  //
-  // Decision: expose a Supabase Edge Function or a profiles lookup. To avoid
-  // adding infra now, we treat the email check as optimistic: existing user if
-  // the seeded demo email, otherwise route to register (signUp will error if
-  // the account already exists). This is documented in README.
-  if (email.toLowerCase() === 'demo@example.com') return true
-  return false
+  // This is the correct cross-device architecture: existence is checked against
+  // the shared Supabase Auth backend, not device-local storage. If the Edge
+  // Function isn't deployed or errors, we conservatively treat the user as NEW
+  // (registration) — signUp() will then surface a clear "already exists" error
+  // from Supabase if they actually do have an account.
+  try {
+    const { data: fnData, error: fnError } = await supabase.functions.invoke<{
+      exists?: boolean
+      error?: string
+    }>('check-email', { body: { email } })
+    if (fnError) return false
+    return Boolean(fnData?.exists)
+  } catch {
+    return false
+  }
 }
 
 export async function requestPasswordReset(email: string): Promise<{ ok: true }> {

@@ -8,6 +8,11 @@ import { Category, HealthRecord } from '../types'
 import { useData } from '../context/DataContext'
 import { recordSummary, categoryLabel } from '../lib/summary'
 import { Chip } from '../components/ui/Chip'
+import {
+  HEALTH_LIMITS,
+  validateBloodPressure,
+  validateNumeric,
+} from '../lib/healthValidation'
 
 const categories: { id: Category; label: string; icon: any; color: string; activeClass: string }[] = [
   { id: 'blood', label: 'Blood', icon: Heart, color: 'text-danger', activeClass: 'border-danger bg-danger/10 text-danger' },
@@ -267,21 +272,13 @@ function FormHeader({ icon, label, colorClass, editing }: { icon: React.ReactNod
   )
 }
 
-// Realistic physiological ranges used to validate BP + pulse entries.
-// Systolic/diastolic bounds mirror the bands classifyBP() reasons about.
+// Physiological ranges + validation live in src/lib/healthValidation.ts and
+// are reused here so BP rules are defined once. The centralized validator also
+// enforces systolic > diastolic.
 const BP_RANGES = {
-  systolic: { min: 60, max: 300, label: 'Systolic' },
-  diastolic: { min: 30, max: 200, label: 'Diastolic' },
-  pulse: { min: 20, max: 250, label: 'Pulse' },
-}
-
-function bpFieldError(raw: string, range: { min: number; max: number; label: string }): string | null {
-  const trimmed = raw.trim()
-  if (!trimmed) return `${range.label} is required`
-  const num = Number(trimmed)
-  if (!Number.isFinite(num)) return `${range.label} must be a number`
-  if (num < range.min || num > range.max) return `${range.label} must be ${range.min}\u2013${range.max}`
-  return null
+  systolic: { ...HEALTH_LIMITS.bloodPressure.systolic, label: 'Systolic' },
+  diastolic: { ...HEALTH_LIMITS.bloodPressure.diastolic, label: 'Diastolic' },
+  pulse: { ...HEALTH_LIMITS.bloodPressure.pulse, label: 'Pulse' },
 }
 
 function BloodForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
@@ -296,12 +293,8 @@ function BloodForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   // form doesn't nag before they've started typing.
   const [showErrors, setShowErrors] = useState(false)
 
-  const errors = {
-    systolic: bpFieldError(systolic, BP_RANGES.systolic),
-    diastolic: bpFieldError(diastolic, BP_RANGES.diastolic),
-    pulse: bpFieldError(pulse, BP_RANGES.pulse),
-  }
-  const hasErrors = Boolean(errors.systolic || errors.diastolic || errors.pulse)
+  // Centralized validation includes the systolic > diastolic relationship.
+  const { errors, hasErrors } = validateBloodPressure(systolic, diastolic, pulse)
 
   async function handle(e: React.FormEvent) {
     e.preventDefault()
@@ -323,9 +316,9 @@ function BloodForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
     setBusy(false)
   }
 
-  const fieldErr = (msg: string | null) =>
+  const fieldErr = (msg: string) =>
     showErrors && msg ? <p className="text-danger text-xs mt-1.5" role="alert">{msg}</p> : null
-  const inputClass = (msg: string | null) => `input ${showErrors && msg ? 'input-error' : ''}`
+  const inputClass = (msg: string) => `input ${showErrors && msg ? 'input-error' : ''}`
 
   return (
     <form onSubmit={handle}>
@@ -356,6 +349,9 @@ function BloodForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
           {fieldErr(errors.pulse)}
         </div>
       </div>
+      {showErrors && errors.relationship && (
+        <p className="text-danger text-xs -mt-1 mb-4" role="alert">{errors.relationship}</p>
+      )}
       <div className="mb-5"><label className="label">Notes (optional)</label><textarea placeholder="Any observations..." value={notes} onChange={(e) => setNotes(e.target.value)} className="input min-h-[80px] resize-none" /></div>
       <FormActions editing={editing} busy={busy} addLabel="Add BP Reading" updateLabel="Update BP Reading" addClass="bg-danger/15 text-danger border border-danger/40 hover:bg-danger/25" onCancel={onCancel} />
     </form>
@@ -406,9 +402,13 @@ function ExerciseForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   const [intensity, setIntensity] = useState(editing?.fields.intensity ?? 'Moderate')
   const [notes, setNotes] = useState(editing?.notes ?? '')
   const [busy, setBusy] = useState(false)
+  const [showErrors, setShowErrors] = useState(false)
+
+  const durationError = validateNumeric(duration, HEALTH_LIMITS.exercise.duration, 'Duration')
 
   async function handle(e: React.FormEvent) {
     e.preventDefault()
+    if (durationError) { setShowErrors(true); return }
     setBusy(true)
     const fields = { exerciseType, duration: Number(duration), intensity }
     if (editing && onUpdate) {
@@ -416,6 +416,7 @@ function ExerciseForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
     } else {
       await onSubmit(fields, time, notes)
       setNotes(''); setTime(nowTime())
+      setShowErrors(false)
     }
     setBusy(false)
   }
@@ -433,7 +434,11 @@ function ExerciseForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-        <div><label className="label">Duration (min)</label><input type="number" required value={duration} onChange={(e) => setDuration(e.target.value)} className="input" /></div>
+        <div>
+          <label className="label">Duration (min)</label>
+          <input type="number" inputMode="numeric" min={HEALTH_LIMITS.exercise.duration.min} max={HEALTH_LIMITS.exercise.duration.max} required value={duration} onChange={(e) => { setDuration(e.target.value); setShowErrors(false) }} className={`input ${showErrors && durationError ? 'input-error' : ''}`} />
+          {showErrors && durationError && <p className="text-danger text-xs mt-1.5" role="alert">{durationError}</p>}
+        </div>
         <div>
           <label className="label">Intensity</label>
           <select value={intensity} onChange={(e) => setIntensity(e.target.value)} className="input">
@@ -620,11 +625,14 @@ function WaterForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
   const [time, setTime] = useState(editing?.time ?? nowTime())
   const [amount, setAmount] = useState(editing ? String(editing.fields.amount ?? '250') : '250')
   const [busy, setBusy] = useState(false)
+  const [showErrors, setShowErrors] = useState(false)
   const presets = [150, 250, 350, 500]
+
+  const amountError = validateNumeric(amount, HEALTH_LIMITS.water.amount, 'Amount')
 
   async function handle(e: React.FormEvent) {
     e.preventDefault()
-    if (!amount) return
+    if (amountError) { setShowErrors(true); return }
     setBusy(true)
     const fields = { amount: Number(amount) }
     if (editing && onUpdate) {
@@ -632,6 +640,7 @@ function WaterForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
     } else {
       await onSubmit(fields, time)
       setTime(nowTime())
+      setShowErrors(false)
     }
     setBusy(false)
   }
@@ -641,7 +650,11 @@ function WaterForm({ editing, onSubmit, onUpdate, onCancel }: FormProps) {
       <FormHeader icon={<Droplets size={18} className="text-water" />} label="Water" colorClass="bg-water/15 text-water" editing={editing} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div><label className="label">Time</label><input type="time" required value={time} onChange={(e) => setTime(e.target.value)} className="input" /></div>
-        <div><label className="label">Amount (ml)</label><input type="number" required value={amount} onChange={(e) => setAmount(e.target.value)} className="input" /></div>
+        <div>
+          <label className="label">Amount (ml)</label>
+          <input type="number" inputMode="numeric" min={HEALTH_LIMITS.water.amount.min} max={HEALTH_LIMITS.water.amount.max} required value={amount} onChange={(e) => { setAmount(e.target.value); setShowErrors(false) }} className={`input ${showErrors && amountError ? 'input-error' : ''}`} />
+          {showErrors && amountError && <p className="text-danger text-xs mt-1.5" role="alert">{amountError}</p>}
+        </div>
       </div>
       <div className="flex flex-wrap gap-2 mb-5">
         {presets.map((p) => (

@@ -16,8 +16,6 @@ const PROD_SUPABASE_REF = 'vunntoepnpwuezkvbhxl'
 const envIsProd = (import.meta.env.VITE_APP_ENV ?? '') === 'production'
 const urlIsProd = (import.meta.env.VITE_SUPABASE_URL ?? '').includes(PROD_SUPABASE_REF)
 const isProduction = envIsProd || urlIsProd
-// TEMP DEBUG: shows which signal won, so a screenshot reveals the truth.
-const __envDebug = `env=${import.meta.env.VITE_APP_ENV ?? '(unset)'} url=${urlIsProd} → prod=${isProduction}`
 
 // Standard 4-color Google "G" mark.
 function GoogleIcon() {
@@ -161,12 +159,6 @@ export default function Login() {
           {error}
         </p>
       )}
-
-      {/* TEMP DEBUG: remove after confirming prod detection. Shows what the
-          build thinks so a screenshot reveals why Guest is/isn't hidden. */}
-      <p className="text-center text-[10px] text-muted/50 font-mono mt-6 break-all">
-        [debug] {__envDebug}
-      </p>
     </AuthLayout>
   )
 }
