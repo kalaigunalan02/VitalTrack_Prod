@@ -6,13 +6,18 @@ import { AuthButton } from '../components/auth/AuthButton'
 import { useAuth } from '../context/AuthContext'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
-// Production is detected from the Supabase URL (the prod project ref), NOT from
-// VITE_APP_ENV — because VITE_APP_ENV may be unset in a Vercel build, but the
-// Supabase URL is always baked in. Replace this ref if the prod project changes.
-// Guard with (?? '') so an unset env var can't throw at module load (which
-// would white-screen the whole app).
+// Production detection — hide the Guest button in prod. We check multiple
+// signals because Vercel's build env vars differ from the local .env files:
+//   1. VITE_APP_ENV === 'production' (explicit, if set in Vercel)
+//   2. Supabase URL contains the prod project ref (always baked in)
+// Hide Guest if EITHER says production. Both are guarded so an unset/empty
+// var can never throw at module load (which would white-screen the app).
 const PROD_SUPABASE_REF = 'vunntoepnpwuezkvbhxl'
-const isProduction = (import.meta.env.VITE_SUPABASE_URL ?? '').includes(PROD_SUPABASE_REF)
+const envIsProd = (import.meta.env.VITE_APP_ENV ?? '') === 'production'
+const urlIsProd = (import.meta.env.VITE_SUPABASE_URL ?? '').includes(PROD_SUPABASE_REF)
+const isProduction = envIsProd || urlIsProd
+// TEMP DEBUG: shows which signal won, so a screenshot reveals the truth.
+const __envDebug = `env=${import.meta.env.VITE_APP_ENV ?? '(unset)'} url=${urlIsProd} → prod=${isProduction}`
 
 // Standard 4-color Google "G" mark.
 function GoogleIcon() {
@@ -156,6 +161,12 @@ export default function Login() {
           {error}
         </p>
       )}
+
+      {/* TEMP DEBUG: remove after confirming prod detection. Shows what the
+          build thinks so a screenshot reveals why Guest is/isn't hidden. */}
+      <p className="text-center text-[10px] text-muted/50 font-mono mt-6 break-all">
+        [debug] {__envDebug}
+      </p>
     </AuthLayout>
   )
 }
