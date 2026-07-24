@@ -120,19 +120,26 @@ export default function Login() {
           onClick={() => navigate('/auth/email')}
         />
 
-        {/* 4. Guest — local-only session */}
-        <AuthButton
-          icon={<UserRound size={20} />}
-          label={busyProvider === 'guest' ? 'Signing in…' : 'Continue as Guest'}
-          variant="ghost"
-          busy={busyProvider === 'guest'}
-          onClick={handleGuest}
-        />
+        {/* 4. Guest — local-only session. Disabled in production (demo account
+            stays in the DB, just no UI entry point for real users). */}
+        {import.meta.env.VITE_APP_ENV !== 'production' && (
+          <>
+            <AuthButton
+              icon={<UserRound size={20} />}
+              label={busyProvider === 'guest' ? 'Signing in…' : 'Continue as Guest'}
+              variant="ghost"
+              busy={busyProvider === 'guest'}
+              onClick={handleGuest}
+            />
+          </>
+        )}
       </div>
 
-      <p className="text-center text-xs text-muted mt-3">
-        Guest mode: data stays on this device.
-      </p>
+      {import.meta.env.VITE_APP_ENV !== 'production' && (
+        <p className="text-center text-xs text-muted mt-3">
+          Guest mode: data stays on this device.
+        </p>
+      )}
 
       {error && (
         <p role="alert" className="text-danger text-sm mt-4 text-center">
