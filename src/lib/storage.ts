@@ -224,29 +224,32 @@ export async function signInDemo(): Promise<Session> {
   return signIn('demo@example.com', 'demo1234', true)
 }
 
-export async function accountExists(email: string): Promise<boolean> {
+/**
+ * Returns:
+ *   true  = email definitely exists in Supabase Auth
+ *   false = email definitely does NOT exist
+ *   null  = could not determine (edge function missing/errored) → caller
+ *           should default the user to the PASSWORD screen, not registration,
+ *           so an existing user is never wrongly sent to sign up.
+ *
+ * The edge function is required because the browser anon key cannot read
+ * auth.users. If it's not deployed, this returns null and the caller treats
+ * the user as existing (the safe default for login).
+ */
+export async function accountExists(email: string): Promise<boolean | null> {
   if (!isSupabaseConfigured) {
     const db = loadDB()
     return delay(db.accounts.some((a) => a.email.toLowerCase() === email.toLowerCase()))
   }
-  // The browser anon key CANNOT read auth.users, so we call a server-side
-  // Edge Function (supabase/functions/check-email) that uses the service role
-  // key (kept secret on the server) to look the email up in auth.users.
-  //
-  // This is the correct cross-device architecture: existence is checked against
-  // the shared Supabase Auth backend, not device-local storage. If the Edge
-  // Function isn't deployed or errors, we conservatively treat the user as NEW
-  // (registration) — signUp() will then surface a clear "already exists" error
-  // from Supabase if they actually do have an account.
   try {
     const { data: fnData, error: fnError } = await supabase.functions.invoke<{
       exists?: boolean
       error?: string
     }>('check-email', { body: { email } })
-    if (fnError) return false
+    if (fnError) return null // unknown — do NOT treat as new
     return Boolean(fnData?.exists)
   } catch {
-    return false
+    return null // unknown — do NOT treat as new
   }
 }
 

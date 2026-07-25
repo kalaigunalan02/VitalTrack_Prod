@@ -33,11 +33,15 @@ export default function PasswordStep() {
   // screen. <Navigate> is the React-Router-blessed way to redirect. These
   // returns come AFTER all hooks so the Rules of Hooks are preserved.
   if (knownNew) {
+    // TEMP DIAGNOSTIC LOG (requirement §9)
+    console.log('[auth] password screen → redirect to /register (knownNew=true, confirmed new email)')
     return <Navigate to="/register" replace state={{ email }} />
   }
   if (!email) {
+    console.log('[auth] password screen → redirect to /auth/email (no email in state)')
     return <Navigate to="/auth/email" replace />
   }
+  console.log('[auth] password screen rendered for', email, '| knownNew =', knownNew)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

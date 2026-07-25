@@ -20,21 +20,22 @@ export default function EmailStep() {
     if (!EMAIL_RE.test(email.trim())) return setError('Please enter a valid email address.')
 
     setBusy(true)
+    // accountExists() returns:
+    //   true  = exists, false = confirmed new, null = unknown (fn missing/errored)
     let exists: boolean | null = null
     try {
-      // accountExists() queries the check-email edge function in cloud mode.
-      // If the function isn't deployed (or errors), it returns false — but we
-      // treat that as "unknown", not "definitely new", and default to the
-      // password screen so existing users aren't wrongly sent to registration.
       exists = await accountExists(email.trim())
     } catch {
-      exists = null // unknown — treat as existing (safer default)
+      exists = null // unknown — default to the password screen
     }
 
+    // TEMP DIAGNOSTIC LOG (requirement §9): shows the lookup result + decision.
+    console.log('[auth] email =', email.trim(), '| lookup =', exists, '| knownNew =', exists === false)
+
     // Route to the password screen when the user exists OR we can't tell.
-    // Only route to registration when we're certain the account is new.
-    // This fixes the cross-device bug: an existing user on a new device always
-    // reaches the password screen.
+    // Only route to registration when we're CERTAIN the account is new
+    // (exists === false). This is the cross-device fix: an existing user on a
+    // new device always reaches the password screen, never registration.
     navigate('/auth/password', { state: { email: email.trim(), knownNew: exists === false } })
     setBusy(false)
   }
