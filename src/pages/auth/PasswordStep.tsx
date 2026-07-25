@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { AuthLayout } from '../../components/auth/AuthLayout'
 import { AuthButton } from '../../components/auth/AuthButton'
@@ -28,14 +28,15 @@ export default function PasswordStep() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
+  // IMPORTANT: use <Navigate> for redirects during render. Calling navigate()
+  // during render throws "Cannot update a component while rendering" → black
+  // screen. <Navigate> is the React-Router-blessed way to redirect. These
+  // returns come AFTER all hooks so the Rules of Hooks are preserved.
   if (knownNew) {
-    navigate('/register', { replace: true, state: { email } })
-    return null
+    return <Navigate to="/register" replace state={{ email }} />
   }
-
   if (!email) {
-    navigate('/auth/email', { replace: true })
-    return null
+    return <Navigate to="/auth/email" replace />
   }
 
   async function handleSubmit(e: React.FormEvent) {
