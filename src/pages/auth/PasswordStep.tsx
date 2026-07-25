@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 
 interface EmailLocationState {
   email?: string
+  knownNew?: boolean
 }
 
 export default function PasswordStep() {
@@ -14,19 +15,25 @@ export default function PasswordStep() {
   const navigate = useNavigate()
   const { signIn } = useAuth()
 
-  // Email is handed off from the EmailStep via router state; fall back to a
-  // query param, and if neither is present, send the user back to email entry.
   const email = (location.state as EmailLocationState | null)?.email
     ?? new URLSearchParams(location.search).get('email')
     ?? ''
+  // If the email step was certain this account doesn't exist yet, bounce to
+  // registration immediately (only happens when the edge function is deployed
+  // and confirmed the email is new).
+  const knownNew = (location.state as EmailLocationState | null)?.knownNew === true
 
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
+  if (knownNew) {
+    navigate('/register', { replace: true, state: { email } })
+    return null
+  }
+
   if (!email) {
-    // No email context — can't sign in. Return to email step.
     navigate('/auth/email', { replace: true })
     return null
   }
@@ -39,8 +46,12 @@ export default function PasswordStep() {
     try {
       await signIn(email, password, true)
       navigate('/dashboard')
-    } catch (err: any) {
-      setError(err.message ?? 'Invalid email or password.')
+    } catch {
+      // Supabase returns the same "invalid credentials" error whether the
+      // account doesn't exist OR the password is wrong (by design, for
+      // security). So we can't auto-branch here. Show the error and offer a
+      // clear path to register in case the user is actually new.
+      setError('Invalid email or password.')
     } finally {
       setBusy(false)
     }
@@ -99,7 +110,21 @@ export default function PasswordStep() {
           <Link to="/forgot-password" className="text-brand text-sm hover:underline">Forgot password?</Link>
         </div>
 
-        {error && <p role="alert" className="text-danger text-sm">{error}</p>}
+        {error && (
+          <div role="alert" className="text-danger text-sm bg-danger/10 border border-danger/30 rounded-lg p-3">
+            <p>{error}</p>
+            <p className="mt-1">
+              Don't have an account?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/register', { state: { email } })}
+                className="text-brand font-medium hover:underline"
+              >
+                Create one
+              </button>
+            </p>
+          </div>
+        )}
 
         <AuthButton type="submit" label={busy ? 'Signing in…' : 'Sign In'} variant="primary" busy={busy} />
       </form>

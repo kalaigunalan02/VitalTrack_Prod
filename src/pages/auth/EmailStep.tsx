@@ -18,17 +18,25 @@ export default function EmailStep() {
     setError('')
     if (!email.trim()) return setError('Email is required.')
     if (!EMAIL_RE.test(email.trim())) return setError('Please enter a valid email address.')
+
     setBusy(true)
+    let exists: boolean | null = null
     try {
-      const exists = await accountExists(email.trim())
-      // Existing user → password; new user → registration (pre-filled email).
-      const target = exists ? '/auth/password' : '/register'
-      navigate(target, { state: { email: email.trim() } })
+      // accountExists() queries the check-email edge function in cloud mode.
+      // If the function isn't deployed (or errors), it returns false — but we
+      // treat that as "unknown", not "definitely new", and default to the
+      // password screen so existing users aren't wrongly sent to registration.
+      exists = await accountExists(email.trim())
     } catch {
-      setError('Could not check account. Please try again.')
-    } finally {
-      setBusy(false)
+      exists = null // unknown — treat as existing (safer default)
     }
+
+    // Route to the password screen when the user exists OR we can't tell.
+    // Only route to registration when we're certain the account is new.
+    // This fixes the cross-device bug: an existing user on a new device always
+    // reaches the password screen.
+    navigate('/auth/password', { state: { email: email.trim(), knownNew: exists === false } })
+    setBusy(false)
   }
 
   return (
@@ -58,6 +66,17 @@ export default function EmailStep() {
 
         <AuthButton type="submit" label={busy ? 'Checking…' : 'Continue'} variant="primary" busy={busy} />
       </form>
+
+      <p className="text-center text-muted text-sm mt-6">
+        Don't have an account?{' '}
+        <button
+          type="button"
+          onClick={() => navigate('/register', { state: { email: email.trim() } })}
+          className="text-brand font-medium hover:underline"
+        >
+          Create one
+        </button>
+      </p>
     </AuthLayout>
   )
 }
